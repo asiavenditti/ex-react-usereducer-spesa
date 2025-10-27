@@ -12,11 +12,27 @@ function App() {
 
   const [addedProduct, setAddedProduct] = useState([])
 
-
   function addToCart(product) {
-    setAddedProduct([...addedProduct, { ...product, quantity: 1 }])
-    console.log(addedProduct)
+    const existsAlready = addedProduct.some((item) => item.name === product.name)
+
+    if (existsAlready) {
+      setAddedProduct(
+        addedProduct.map((item) => {
+          if (item.name === product.name) {
+
+            return { ...item, quantity: item.quantity + 1 }
+          } else {
+
+            return item;
+          }
+        })
+      )
+    } else {
+
+      setAddedProduct([...addedProduct, { ...product, quantity: 1 }])
+    }
   }
+
 
 
   return (
@@ -30,6 +46,20 @@ function App() {
           </li>
         ))}
       </ul>
+      {addedProduct.length > 0 && (
+        <div>
+          <h2>Carrello</h2>
+          {addedProduct.map((p, index) => {
+            return (
+              <ul key={index}>
+                <li>Prodotto: {p.name}</li>
+                <li>{`Prezzo: ${p.price.toFixed(2)} €`}</li>
+                <li> Quantità {p.quantity}</li>
+              </ul>
+            )
+          })}
+        </div>
+      )}
     </>
   )
 }
