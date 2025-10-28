@@ -1,6 +1,8 @@
 
+import { useReducer } from 'react';
 import './App.css'
-import { useState } from 'react';
+// import { useState } from 'react';
+
 
 function App() {
 
@@ -11,41 +13,74 @@ function App() {
     { name: 'Pasta', price: 0.7 },
   ];
 
-  const [addedProduct, setAddedProduct] = useState([])
+  const [addedProduct, dispatch] = useReducer(cartReducer, [])
+
+  function cartReducer(state, action) {
+    switch (action.type) {
+      // aggiungi un prodotto
+      case 'ADD_ITEM':
+        return [...state, { ...action.payload, quantity: 1 }]
 
 
-  function addToCart(product) {
-    const existsAlready = addedProduct.some((item) => item.name === product.name)
+      // rimuovi prodotto
+      case 'REMOVE_ITEM':
+        return state.filter((item) => item.name !== action.payload.name)
 
-    if (existsAlready) {
-      setAddedProduct(
-        updateProductQuantity(product)
-      )
-    } else {
+      // aumenta la quantità 
+      case 'UPDATE_QUANTITY':
+        const alreadyExist = state.find(item => item.name === action.payload.name)
 
-      setAddedProduct([...addedProduct, { ...product, quantity: 1 }])
+        if (alreadyExist) {
+          // se il prodotto esiste, incrementa la quantità
+          return state.map(item => {
+            if (item.name === action.payload.name) {
+              return { ...item, quantity: item.quantity + 1 }
+            } else {
+              return item
+            }
+          });
+        } else {
+          // se non esiste, lo aggiunge con quantity = 1
+          return [...state, { ...action.payload, quantity: 1 }]
+        }
     }
   }
 
-
-  function updateProductQuantity(product) {
-    return addedProduct.map((item) => {
-      if (item.name === product.name) {
-
-        return { ...item, quantity: item.quantity + 1 }
-      } else {
-
-        return item;
-      }
-    })
-  }
-
-  function removeFromCart(product) {
-    return setAddedProduct(
-      addedProduct.filter((item) => item.name !== product.name))
+  // const [addedProduct, setAddedProduct] = useState([])
 
 
-  }
+  // function addToCart(product) {
+  //   const existsAlready = addedProduct.some((item) => item.name === product.name)
+
+  //   if (existsAlready) {
+  //     setAddedProduct(
+  //       updateProductQuantity(product)
+  //     )
+  //   } else {
+
+  //     setAddedProduct([...addedProduct, { ...product, quantity: 1 }])
+  //   }
+  // }
+
+
+  // function updateProductQuantity(product) {
+  //   return addedProduct.map((item) => {
+  //     if (item.name === product.name) {
+
+  //       return { ...item, quantity: item.quantity + 1 }
+  //     } else {
+
+  //       return item;
+  //     }
+  //   })
+  // }
+
+  // function removeFromCart(product) {
+  //   return setAddedProduct(
+  //     addedProduct.filter((item) => item.name !== product.name))
+
+
+  // }
 
 
   const total = addedProduct.reduce((acc, item) => {
@@ -60,7 +95,7 @@ function App() {
           <li key={index}>
             <span>{product.name}</span> -
             <span>€{product.price}</span>
-            <button onClick={() => addToCart(product)}>Aggiungi al carrello</button>
+            <button onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: product })}>Aggiungi al carrello</button>
           </li>
         ))}
       </ul>
@@ -73,7 +108,7 @@ function App() {
                 <li>Prodotto: {product.name}</li>
                 <li>{`Prezzo: ${product.price.toFixed(2)} €`}</li>
                 <li> Quantità {product.quantity}</li>
-                <button onClick={() => removeFromCart(product)}>Rimuovi dal carrello</button>
+                <button onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: product })}>Rimuovi dal carrello</button>
               </ul>
             )
           })}
