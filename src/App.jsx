@@ -1,6 +1,7 @@
 
 import './App.css'
 import { useState } from 'react';
+
 function App() {
 
   const products = [
@@ -12,20 +13,13 @@ function App() {
 
   const [addedProduct, setAddedProduct] = useState([])
 
+
   function addToCart(product) {
     const existsAlready = addedProduct.some((item) => item.name === product.name)
 
     if (existsAlready) {
       setAddedProduct(
-        addedProduct.map((item) => {
-          if (item.name === product.name) {
-
-            return { ...item, quantity: item.quantity + 1 }
-          } else {
-
-            return item;
-          }
-        })
+        updateProductQuantity(product)
       )
     } else {
 
@@ -33,6 +27,30 @@ function App() {
     }
   }
 
+
+  function updateProductQuantity(product) {
+    return addedProduct.map((item) => {
+      if (item.name === product.name) {
+
+        return { ...item, quantity: item.quantity + 1 }
+      } else {
+
+        return item;
+      }
+    })
+  }
+
+  function removeFromCart(product) {
+    return setAddedProduct(
+      addedProduct.filter((item) => item.name !== product.name))
+
+
+  }
+
+
+  const total = addedProduct.reduce((acc, item) => {
+    return acc + item.price * item.quantity
+  }, 0)
 
 
   return (
@@ -49,16 +67,21 @@ function App() {
       {addedProduct.length > 0 && (
         <div>
           <h2>Carrello</h2>
-          {addedProduct.map((p, index) => {
+          {addedProduct.map((product, index) => {
             return (
               <ul key={index}>
-                <li>Prodotto: {p.name}</li>
-                <li>{`Prezzo: ${p.price.toFixed(2)} €`}</li>
-                <li> Quantità {p.quantity}</li>
+                <li>Prodotto: {product.name}</li>
+                <li>{`Prezzo: ${product.price.toFixed(2)} €`}</li>
+                <li> Quantità {product.quantity}</li>
+                <button onClick={() => removeFromCart(product)}>Rimuovi dal carrello</button>
               </ul>
             )
           })}
+          <div className="total-price">
+            <span>{`Il totale è ${total.toFixed(2)}€`}</span>
+          </div>
         </div>
+
       )}
     </>
   )
